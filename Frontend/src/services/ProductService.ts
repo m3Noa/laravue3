@@ -13,6 +13,12 @@ class ProductService {
   deleteProduct(id) {
     return axiosInstance.delete(`/products/${id}`)
   }
+  createProduct(payload) {
+    return axiosInstance.post('/products/add', payload)
+  }
+  updateProduct({ id, payload }) {
+    return axiosInstance.put(`/products/${id}`, payload)
+  }
 }
 
 export default new ProductService()

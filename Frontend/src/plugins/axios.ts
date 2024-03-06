@@ -42,7 +42,7 @@ function registerResponseMiddleware(instance: AxiosInstance) {
 
 export function buildAxiosInstance() {
   const options = {
-    baseURL: 'https://dummyjson.com' || process.env.VUE_APP_API_BASE_URL,
+    baseURL: process.env.VUE_APP_API_BASE_URL || 'https://dummyjson.com',
     headers: {
       'Content-type': 'application/json',
       'Access-Control-Allow-Origin': '*',
