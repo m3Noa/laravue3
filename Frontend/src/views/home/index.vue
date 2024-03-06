@@ -22,9 +22,6 @@
             </template>
           </div>
         </template>
-        <!-- <template v-if="['image'].includes(column.dataIndex)">
-          <img :src="editableData[record.key]" alt="" />
-        </template> -->
         <template v-else-if="column.dataIndex === 'operation'">
           <div class="flex">
             <router-link
@@ -89,11 +86,6 @@ const columns = [
     dataIndex: 'price',
     width: '40%',
   },
-  // {
-  //   title: 'Image',
-  //   dataIndex: 'images',
-  //   width: '40%',
-  // },
   {
     title: 'operation',
     dataIndex: 'operation',
@@ -125,39 +117,29 @@ const pagination = ref<Pagination>({
   total: 10,
 })
 const valueSearch = ref<string>('')
-const getProductAll = async () => {
-  // const params = {
-  //   limit: pagination.value.limit,
-  //   skip: pagination.value.skip,
-  // }
-  // const res = await ProductService.getProductAll(params)
-  // console.log(res)
-
-  fetch(
-    `https://dummyjson.com/products?limit=${pagination.value.limit}&skip=${pagination.value.skip}`,
-
-    {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  )
-    .then((res) => res.json())
-    .then((data) => {
-      productList.value = data
-      const { skip, limit, total } = data
-      pagination.value = {
-        skip,
-        limit,
-        total,
-      }
-    })
-}
-getProductAll()
 
 const editableData: UnwrapRef<Record<string, ProductItem>> = reactive({})
+
+const getProductAll = async (page: number) => {
+  const params = {
+    limit: pagination.value.limit,
+    skip: page || pagination.value.skip,
+  }
+  const res = await ProductService.getProductAll(params)
+  if (res.success) {
+    productList.value = res
+    const { skip, limit, total } = res
+    pagination.value = {
+      skip,
+      limit,
+      total,
+    }
+    message.success({ content: 'Lấy danh sách sản phẩm thành công', key: 'product', duration: 2 })
+  } else {
+    message.error({ content: 'Lấy danh sách sản phẩm lỗi', key: 'product', duration: 2 })
+  }
+}
+getProductAll()
 
 const edit = (id: number) => {
   console.log(id)
@@ -168,33 +150,31 @@ const save = (id: number) => {
 const cancel = (id: number) => {
   delete editableData[id]
 }
-const onDelete = (id: number) => {
-  fetch(
-    `https://dummyjson.com/products/${id}`,
-
-    {
-      method: 'DELETE',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  )
-    .then((data) => {
-      console.log(data)
-
-      message.success({ content: 'Xoá sản phẩm thành công', key: 'product', duration: 2 })
-    })
-    .catch(() => {
-      message.error({ content: 'Xoá sản phẩm không thành công', key: 'product', duration: 2 })
-    })
+const onDelete = async (id: number) => {
+  const res = await ProductService.deleteProduct(id)
+  if (res.success) {
+    message.success({ content: 'Xoá sản phẩm thành công', key: 'product', duration: 2 })
+    getProductAll(1)
+  } else {
+    message.error({ content: 'Xoá sản phẩm không thành công', key: 'product', duration: 2 })
+  }
 }
 const onSearch = async () => {
-  const res = await ProductService.getProductAll()
-  console.log(res)
+  const res = await ProductService.getProductSearch(valueSearch.value)
+  if (res.success) {
+    productList.value = res
+    const { skip, limit, total } = res
+    pagination.value = {
+      skip,
+      limit,
+      total,
+    }
+    message.success({ content: 'Tìm kiếm sản phẩm thành công', key: 'product', duration: 2 })
+  } else {
+    message.error({ content: 'Tìm kiếm sản phẩm không thành công', key: 'product', duration: 2 })
+  }
 }
 const onChangePage = (e: number) => {
-  pagination.value.skip = e
-  getProductAll()
+  getProductAll(e)
 }
 </script>

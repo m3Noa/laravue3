@@ -15,9 +15,7 @@ function registerRequestMiddleware(instance: AxiosInstance) {
 function registerResponseMiddleware(instance: AxiosInstance) {
   instance.interceptors.response.use(
     (response) => {
-      if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
-        response.data.success = true
-      }
+      response.data.success = true
       return response?.data // simply return the response's data
     },
     async (error) => {
@@ -47,8 +45,8 @@ export function buildAxiosInstance() {
     baseURL: process.env.VUE_APP_API_BASE_URL || 'https://dummyjson.com/',
     headers: {
       'Content-type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
     },
-    withCredentials: true,
   }
   const instance = axios.create(options)
   registerRequestMiddleware(instance)
