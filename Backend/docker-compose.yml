@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  workspace:
+    container_name: jen_workspace
+    build:
+      context: .
+      dockerfile: docker/workspace/Dockerfile
+    volumes:
+      - ./:/var/www/laravel
+    tty: true
+    networks:
+      - ${NETWORK}
+  php-fpm:
+    container_name: jen_php-fpm
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    volumes_from:
+      - workspace
+    expose:
+      - "2222"
+    links:
+      - workspace
+    networks:
+      - ${NETWORK}
+  nginx:
+    container_name: jen_nginx
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    volumes_from:
+      - workspace
+    ports:
+      - "8888:80"
+    links:
+      - php-fpm
+    networks:
+      - ${NETWORK}
+networks:
+  jen-network:
+    driver: bridge
+    name: ${NETWORK}
