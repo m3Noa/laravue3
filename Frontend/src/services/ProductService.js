@@ -1,8 +1,8 @@
 import axiosInstance from '../plugins/axios'
 
 class ProductService {
-  getProductAll() {
-    return axiosInstance.get('/products')
+  getProductAll(params) {
+    return axiosInstance.get('/products', params)
   }
 }
 

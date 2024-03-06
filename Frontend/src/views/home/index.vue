@@ -8,13 +8,13 @@
         @search="onSearch"
       />
     </div>
-    <a-table :pagination="false" :columns="columns" :data-source="dataSource" bordered>
+    <a-table :pagination="false" :columns="columns" :data-source="productList?.products" bordered>
       <template #bodyCell="{ column, text, record }">
         <template v-if="['name', 'age', 'address'].includes(column.dataIndex)">
           <div>
             <a-input
-              v-if="editableData[record.key]"
-              v-model:value="editableData[record.key][column.dataIndex]"
+              v-if="editableData[record.id]"
+              v-model:value="editableData[record.id][column.dataIndex]"
               class="my-[-5px]"
             />
             <template v-else>
@@ -28,28 +28,25 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <div class="flex">
             <router-link
-              v-if="!editableData[record.key]"
+              v-if="!editableData[record.id]"
               class="mr-2"
-              :to="`/product/detail?slug=${record.key}`"
+              :to="`/product/detail?slug=${record.id}`"
               >Detail</router-link
             >
             <div class="mr-2">
-              <span v-if="editableData[record.key]">
-                <a-typography-link class="mr-2" @click="save(record.key)">Save</a-typography-link>
-                <a-popconfirm title="Sure to cancel?" @confirm="cancel(record.key)">
+              <span v-if="editableData[record.id]">
+                <a-typography-link class="mr-2" @click="save(record.id)">Save</a-typography-link>
+                <a-popconfirm title="Sure to cancel?" @confirm="cancel(record.id)">
                   <a>Cancel</a>
                 </a-popconfirm>
               </span>
               <span v-else>
-                <a @click="edit(record.key)">Edit</a>
+                <a @click="edit(record.id)">Edit</a>
               </span>
             </div>
-            <div v-if="!editableData[record.key]">
-              <a-popconfirm
-                v-if="dataSource.length"
-                title="Sure to delete?"
-                @confirm="onDelete(record.key)"
-              >
+            <div v-if="!editableData[record.id]">
+              <!-- v-if="productList?.product?.length" -->
+              <a-popconfirm title="Sure to delete?" @confirm="onDelete(record.id)">
                 <a>Delete</a>
               </a-popconfirm>
             </div>
@@ -57,13 +54,19 @@
         </template>
       </template>
     </a-table>
-    <a-pagination v-model:current="current" class="mt-2" :total="500" @change="onChangePage" />
+    <a-pagination
+      v-model="pagination.skip"
+      class="mt-2"
+      :total="pagination?.total"
+      @change="onChangePage"
+    />
   </div>
 </template>
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
-// import ProductService from '../../services/ProductService'
+import { message } from 'ant-design-vue'
+import ProductService from '../../services/ProductService'
 
 const columns = [
   {
@@ -96,170 +99,102 @@ const columns = [
     dataIndex: 'operation',
   },
 ]
-interface DataItem {
-  key: string
-  name: string
-  age: number
-  address: string
+interface ProductItem {
+  id: number
+  title: string
+  description: string
+  price: number
+  discountPercentage: number
+  rating: number
+  stock: number
+  brand: string
+  category: string
+  thumbnail: string
+  images: string[]
+}
+interface Pagination {
+  skip: number
+  limit: number
+  total: number
 }
 
-const dataSource = ref(null)
+const productList = ref<ProductItem[] | null>(null)
+const pagination = ref<Pagination>({
+  skip: 1,
+  limit: 5,
+  total: 10,
+})
 const valueSearch = ref<string>('')
-fetch('https://dummyjson.com/products')
-  .then((res) => {
-    console.log(res)
+const getProductAll = async () => {
+  // const params = {
+  //   limit: pagination.value.limit,
+  //   skip: pagination.value.skip,
+  // }
+  // const res = await ProductService.getProductAll(params)
+  // console.log(res)
 
-    dataSource.value = [
-      {
-        id: 1,
-        title: 'iPhone 9',
-        description: 'An apple mobile which is nothing like apple',
-        price: 549,
-        discountPercentage: 12.96,
-        rating: 4.69,
-        stock: 94,
-        brand: 'Apple',
-        category: 'smartphones',
-        thumbnail: 'https://cdn.dummyjson.com/product-images/1/thumbnail.jpg',
-        images: [
-          'https://cdn.dummyjson.com/product-images/1/1.jpg',
-          'https://cdn.dummyjson.com/product-images/1/2.jpg',
-          'https://cdn.dummyjson.com/product-images/1/3.jpg',
-          'https://cdn.dummyjson.com/product-images/1/4.jpg',
-          'https://cdn.dummyjson.com/product-images/1/thumbnail.jpg',
-        ],
-      },
-      {
-        id: 2,
-        title: 'iPhone X',
-        description:
-          'SIM-Free, Model A19211 6.5-inch Super Retina HD display with OLED technology A12 Bionic chip with ...',
-        price: 899,
-        discountPercentage: 17.94,
-        rating: 4.44,
-        stock: 34,
-        brand: 'Apple',
-        category: 'smartphones',
-        thumbnail: 'https://cdn.dummyjson.com/product-images/2/thumbnail.jpg',
-        images: [
-          'https://cdn.dummyjson.com/product-images/2/1.jpg',
-          'https://cdn.dummyjson.com/product-images/2/2.jpg',
-          'https://cdn.dummyjson.com/product-images/2/3.jpg',
-          'https://cdn.dummyjson.com/product-images/2/thumbnail.jpg',
-        ],
-      },
-      {
-        id: 3,
-        title: 'Samsung Universe 9',
-        description: "Samsung's new variant which goes beyond Galaxy to the Universe",
-        price: 1249,
-        discountPercentage: 15.46,
-        rating: 4.09,
-        stock: 36,
-        brand: 'Samsung',
-        category: 'smartphones',
-        thumbnail: 'https://cdn.dummyjson.com/product-images/3/thumbnail.jpg',
-        images: ['https://cdn.dummyjson.com/product-images/3/1.jpg'],
-      },
-      {
-        id: 4,
-        title: 'OPPOF19',
-        description: 'OPPO F19 is officially announced on April 2021.',
-        price: 280,
-        discountPercentage: 17.91,
-        rating: 4.3,
-        stock: 123,
-        brand: 'OPPO',
-        category: 'smartphones',
-        thumbnail: 'https://cdn.dummyjson.com/product-images/4/thumbnail.jpg',
-        images: [
-          'https://cdn.dummyjson.com/product-images/4/1.jpg',
-          'https://cdn.dummyjson.com/product-images/4/2.jpg',
-          'https://cdn.dummyjson.com/product-images/4/3.jpg',
-          'https://cdn.dummyjson.com/product-images/4/4.jpg',
-          'https://cdn.dummyjson.com/product-images/4/thumbnail.jpg',
-        ],
-      },
-      {
-        id: 5,
-        title: 'Huawei P30',
-        description:
-          'Huawei’s re-badged P30 Pro New Edition was officially unveiled yesterday in Germany and now the device has made its way to the UK.',
-        price: 499,
-        discountPercentage: 10.58,
-        rating: 4.09,
-        stock: 32,
-        brand: 'Huawei',
-        category: 'smartphones',
-        thumbnail: 'https://cdn.dummyjson.com/product-images/5/thumbnail.jpg',
-        images: [
-          'https://cdn.dummyjson.com/product-images/5/1.jpg',
-          'https://cdn.dummyjson.com/product-images/5/2.jpg',
-          'https://cdn.dummyjson.com/product-images/5/3.jpg',
-        ],
-      },
-      {
-        id: 6,
-        title: 'MacBook Pro',
-        description:
-          'MacBook Pro 2021 with mini-LED display may launch between September, November',
-        price: 1749,
-        discountPercentage: 11.02,
-        rating: 4.57,
-        stock: 83,
-        brand: 'Apple',
-        category: 'laptops',
-        thumbnail: 'https://cdn.dummyjson.com/product-images/6/thumbnail.png',
-        images: [
-          'https://cdn.dummyjson.com/product-images/6/1.png',
-          'https://cdn.dummyjson.com/product-images/6/2.jpg',
-          'https://cdn.dummyjson.com/product-images/6/3.png',
-          'https://cdn.dummyjson.com/product-images/6/4.jpg',
-        ],
-      },
-      {
-        id: 7,
-        title: 'Samsung Galaxy Book',
-        description:
-          'Samsung Galaxy Book S (2020) Laptop With Intel Lakefield Chip, 8GB of RAM Launched',
-        price: 1499,
-        discountPercentage: 4.15,
-        rating: 4.25,
-        stock: 50,
-        brand: 'Samsung',
-        category: 'laptops',
-        thumbnail: 'https://cdn.dummyjson.com/product-images/7/thumbnail.jpg',
-        images: [
-          'https://cdn.dummyjson.com/product-images/7/1.jpg',
-          'https://cdn.dummyjson.com/product-images/7/2.jpg',
-          'https://cdn.dummyjson.com/product-images/7/3.jpg',
-          'https://cdn.dummyjson.com/product-images/7/thumbnail.jpg',
-        ],
-      },
-    ]
-  })
-  .then((json) => console.log(json))
+  fetch(
+    `https://dummyjson.com/products?limit=${pagination.value.limit}&skip=${pagination.value.skip}`,
 
-const editableData: UnwrapRef<Record<string, DataItem>> = reactive({})
+    {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      productList.value = data
+      const { skip, limit, total } = data
+      pagination.value = {
+        skip,
+        limit,
+        total,
+      }
+    })
+}
+getProductAll()
 
-const edit = (key: string) => {
-  editableData[key] = dataSource.value.filter((item) => key === item.key)[0]
+const editableData: UnwrapRef<Record<string, ProductItem>> = reactive({})
+
+const edit = (id: number) => {
+  console.log(id)
 }
-const save = (key: string) => {
-  Object.assign(dataSource.value.filter((item) => key === item.key)[0], editableData[key])
-  delete editableData[key]
+const save = (id: number) => {
+  console.log(id)
 }
-const cancel = (key: string) => {
-  delete editableData[key]
+const cancel = (id: number) => {
+  delete editableData[id]
 }
-const onDelete = (key: string) => {
-  dataSource.value = dataSource.value.filter((item) => item.key !== key)
+const onDelete = (id: number) => {
+  fetch(
+    `https://dummyjson.com/products/${id}`,
+
+    {
+      method: 'DELETE',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  )
+    .then((data) => {
+      console.log(data)
+
+      message.success({ content: 'Xoá sản phẩm thành công', key: 'product', duration: 2 })
+    })
+    .catch(() => {
+      message.error({ content: 'Xoá sản phẩm không thành công', key: 'product', duration: 2 })
+    })
 }
 const onSearch = async () => {
-  // const res = await ProductService.getProductAll()
-  // console.log(res)
+  const res = await ProductService.getProductAll()
+  console.log(res)
 }
 const onChangePage = (e: number) => {
-  console.log(e)
+  pagination.value.skip = e
+  getProductAll()
 }
 </script>
