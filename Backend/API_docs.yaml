@@ -1,0 +1,226 @@
+openapi: 3.0.3
+info:
+  title: Swagger Product
+  description: Product API
+  version: 1.0.11
+servers:
+  - url: http://localhost:8888/api/v1
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get List Product API
+      description: Get list product
+      parameters:
+        - name: limit
+          in: query
+          description: Limit product
+          required: false
+          schema:
+            type: integer
+            default: 30
+        - name: skip
+          in: query
+          description: Skip product
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Products'
+                  total:
+                    type: integer
+                    example: 100
+                  skip:
+                    type: integer
+                    example: 0
+                  limit:
+                    type: integer
+                    example: 30
+
+    post:
+      tags:
+        - Products
+      summary: Create Product API
+      description: Create product API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Product title
+                description:
+                  type: string
+                  example: Product description
+                price:
+                  type: number
+                  example: 549
+                discountPercentage:
+                  type: number
+                  example: 12.96
+                rating:
+                  type: string
+                  example: 4.69
+                stock:
+                  type: integer
+                  example: 94
+                brand:
+                  type: string
+                  example: "Apple"
+                category:
+                  type: string
+                  example: "Smartphones"
+                thumbnail:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Products'
+
+  /products/{productId}:
+    put:
+      tags:
+        - Products
+      summary: Update Product API
+      description: Update product API
+      parameters:
+        - name: productId
+          in: path
+          description: ID of product to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Product title
+                description:
+                  type: string
+                  example: Product description
+                price:
+                  type: number
+                  example: 549
+                discountPercentage:
+                  type: number
+                  example: 12.96
+                rating:
+                  type: string
+                  example: 4.69
+                stock:
+                  type: integer
+                  example: 94
+                brand:
+                  type: string
+                  example: "Apple"
+                category:
+                  type: string
+                  example: "Smartphones"
+                thumbnail:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+
+      responses:
+        '200':
+          description: Update successfully response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Products'
+
+    delete:
+      tags:
+        - Products
+      summary: Delete Product API
+      description: Delete product API
+      parameters:
+        - name: productId
+          in: path
+          description: ID of product to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Delete successfully response
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Delete Book successfully"
+
+components:
+  schemas:
+    Products:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        title:
+          type: string
+          example: Product title
+        description:
+          type: string
+          example: Product description
+        price:
+          type: number
+          example: 549
+        discountPercentage:
+          type: number
+          example: 12.96
+        rating:
+          type: string
+          example: 4.69
+        stock:
+          type: integer
+          example: 94
+        brand:
+          type: string
+          example: "Apple"
+        category:
+          type: string
+          example: "Smartphones"
+        thumbnail:
+          type: string
+
+        images:
+          type: array
+          items:
+            type: string
+
+
+
+
+
+
+
