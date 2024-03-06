@@ -3,7 +3,12 @@
     <div class="flex items-center justify-end mb-2">
       <a-button @click="handleAddNewProduct"> Add new Product </a-button>
     </div>
-    <a-table :pagination="false" :columns="columns" :data-source="productList?.products" bordered>
+    <a-table
+      :pagination="false"
+      :columns="TABLE_COLUMN"
+      :data-source="productList?.products"
+      bordered
+    >
       <template #bodyCell="{ column, text, record }">
         <a-skeleton
           v-if="isLoading && column.dataIndex !== 'thumbnail'"
@@ -78,47 +83,10 @@ import type { UnwrapRef } from 'vue'
 import { message } from 'ant-design-vue'
 import ProductService from '../../services/ProductService'
 import ModalProduct from './components/ModalProduct.vue'
+import { PAGINATION, TABLE_COLUMN } from '@/constants/views/home/index'
 
-const columns = [
-  {
-    title: 'ID',
-    dataIndex: 'id',
-    width: '40px',
-  },
-  {
-    title: 'Title',
-    dataIndex: 'title',
-    width: '15%',
-  },
-  {
-    title: 'Thumbnail',
-    dataIndex: 'thumbnail',
-    width: '80px',
-  },
-  {
-    title: 'Description',
-    dataIndex: 'description',
-  },
-  {
-    title: 'Price',
-    dataIndex: 'price',
-    width: '100px',
-    align: 'right',
-  },
-  {
-    title: 'Discount',
-    dataIndex: 'discountPercentage',
-    width: '100px',
-    align: 'right',
-  },
-  {
-    title: 'Action',
-    dataIndex: 'action',
-    width: '150px',
-  },
-]
-export interface ProductItem {
-  id: number
+interface ProductItem {
+  id?: number
   title: string
   description: string
   price: number
@@ -130,22 +98,10 @@ export interface ProductItem {
   thumbnail: string
   images: string[]
 }
-export interface Pagination {
-  skip: number
+interface Pagination {
+  skip: number | null
   limit: number
-  total: number
-}
-interface FormValue {
-  title: string
-  description: string
-  price: number
-  discountPercentage: number
-  rating: number
-  stock: number
-  brand: string
-  category: string
-  thumbnail: string
-  images: []
+  total: number | null
 }
 
 const isLoading = ref<boolean>(false)
@@ -166,16 +122,16 @@ const productDetail = ref<ProductItem>({
   images: [],
 })
 const pagination = ref<Pagination>({
-  skip: 1,
-  limit: 5,
-  total: 10,
+  skip: null,
+  limit: PAGINATION.Limit,
+  total: null,
 })
-var isOpenModal = ref<boolean>(false)
-var titleModal = ref<string>('Add new a Product')
+const isOpenModal = ref<boolean>(false)
+const titleModal = ref<string>('Add new a Product')
 
 const editableData: UnwrapRef<Record<string, ProductItem>> = reactive({})
 
-const getProductAll = async (page: number) => {
+const getProductAll = async (page?: number) => {
   const params = {
     limit: pagination.value.limit,
     skip: page || pagination.value.skip,
@@ -252,7 +208,7 @@ const handleAddNewProduct = () => {
   isEdit.value = false
 }
 
-const handleSubmitModal = async (value: FormValue) => {
+const handleSubmitModal = async (value: ProductItem) => {
   const formData = JSON.parse(JSON.stringify(value))
   const payload = {
     title: formData.title,
@@ -273,10 +229,10 @@ const handleSubmitModal = async (value: FormValue) => {
     isOpenModal.value = false
     isEdit.value = false
     if (res.success) {
-      message.success({ content: 'Update product successfully', key: 'get', duration: 2 })
+      message.success({ content: 'Update product successfully', key: 'update', duration: 2 })
       getProductAll()
     } else {
-      message.error({ content: 'Update product error', key: 'get', duration: 2 })
+      message.error({ content: 'Update product error', key: 'update', duration: 2 })
     }
   } else {
     const res = await ProductService.createProduct(payload)
@@ -284,10 +240,10 @@ const handleSubmitModal = async (value: FormValue) => {
     isOpenModal.value = false
     isEdit.value = false
     if (res.success) {
-      message.success({ content: 'Create new product successfully', key: 'get', duration: 2 })
+      message.success({ content: 'Create new product successfully', key: 'add', duration: 2 })
       getProductAll()
     } else {
-      message.error({ content: 'Create new product error', key: 'get', duration: 2 })
+      message.error({ content: 'Create new product error', key: 'add', duration: 2 })
     }
   }
 }

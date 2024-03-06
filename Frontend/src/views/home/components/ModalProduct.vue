@@ -1,13 +1,7 @@
 <template>
   <div class="modal-product">
     <a-modal :open="open" :title="title" :footer="null" @cancel="handleCancelModal">
-      <a-form
-        :model="formState"
-        name="basic"
-        autocomplete="off"
-        @finish="onFinish"
-        @finish-failed="onFinishFailed"
-      >
+      <a-form :model="formState" name="basic" autocomplete="off" @finish="onFinish">
         <a-form-item
           label="Title"
           name="title"
@@ -152,10 +146,6 @@ export default defineComponent({
     const onFinish = () => {
       context.emit('handleSubmitModal', formState.value)
     }
-
-    const onFinishFailed = (errorInfo) => {
-      console.log('Failed:', errorInfo)
-    }
     const beforeUpload: UploadProps['beforeUpload'] = (file) => {
       fileList.value = [...(fileList.value || []), file]
       formState.value.images = JSON.parse(JSON.stringify(fileList.value)) || []
@@ -175,7 +165,6 @@ export default defineComponent({
       beforeUpload,
       handleRemove,
       onFinish,
-      onFinishFailed,
     }
   },
   methods: {

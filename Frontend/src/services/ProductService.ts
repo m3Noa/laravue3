@@ -14,7 +14,7 @@ class ProductService {
     return axiosInstance.delete(`/products/${id}`)
   }
   createProduct(payload) {
-    return axiosInstance.post('/products/add', payload)
+    return axiosInstance.post('/products', payload)
   }
   updateProduct({ id, payload }) {
     return axiosInstance.put(`/products/${id}`, payload)

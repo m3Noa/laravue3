@@ -19,6 +19,14 @@ A Vue 3 Starter Boilerplate with Vue Router 4, Pinia 2, Typescript 5, Webpack 5,
 ## Commands
 
 ```bash
+# Modify .env config file (optional).
+VUE_APP_API_BASE_URL=http://domain_backend/api
+```
+
+```bash
+# Install
+yarn install
+
 # Start development server.
 yarn dev
 
