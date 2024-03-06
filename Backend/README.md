@@ -38,3 +38,6 @@ php artisan key:generate
 ```BASH
 php artisan serve
 ```
+
+## API Docs
+- Access website `https://editor.swagger.io/` and import `API_docs.yaml` file to see the API docs 

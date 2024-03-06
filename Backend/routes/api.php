@@ -32,4 +32,9 @@ Route::group([
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('profile', [AuthController::class, 'profile']);
     });
+
+    Route::get('products', [ProductController::class, 'get']);
+    Route::post('products', [ProductController::class, 'create']);
+    Route::put('products/{productId}', [ProductController::class, 'update']);
+    Route::delete('products/{productId}', [ProductController::class, 'delete']);
 });
